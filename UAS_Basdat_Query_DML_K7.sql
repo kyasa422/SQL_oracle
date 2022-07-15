@@ -1,0 +1,11 @@
+INSERT INTO perusahaan (PNama) VALUES ('jne');
+INSERT INTO PERUSAHAAN_ALAMAT (PID, JALAN, RT, RW, KELURAHAN, KECAMATAN, KAB_KOTA, KODEPOS) VALUES (1, 'Reformasi', 5, 1, 'Kukusan', 'Beji', 'Depok', 166996);
+INSERT ALL
+	INTO PERUSAHAAN_TELP (PID, PTelp) VALUES (1, '08181818')
+	INTO PERUSAHAAN_TELP (PID, PTelp) VALUES (1, '09161616')
+SELECT * FROM dual;
+
+
+INSERT INTO customer (Cnama,Cgender,cwaktupesanan,C_alamat) VALUES('agus','laki','2017-10-12 21:22:23',10) 
+SELECT * FROM dual;
+--CONSTRAINT kurir_fk FOREIGN KEY (PID) REFERENCES perusahaan(PID)

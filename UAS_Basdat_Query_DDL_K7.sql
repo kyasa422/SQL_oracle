@@ -1,0 +1,325 @@
+ALTER SESSION SET "_ORACLE_SCRIPT" = TRUE;
+
+CREATE USER pengiriman IDENTIFIED BY admin;
+
+GRANT ALL PRIVILEGES TO pengiriman;
+
+
+
+	--CREATE TABLE perusahaan
+	CREATE TABLE perusahaan(
+		PID NUMBER (10) NOT NULL PRIMARY KEY,
+		PNama VARCHAR (50) NOT NULL
+	);
+	
+	CREATE SEQUENCE perusahaan_seq START WITH 1;
+	
+	CREATE OR REPLACE TRIGGER perusahaan_on_insert
+		 BEFORE INSERT ON perusahaan
+		 FOR EACH ROW
+	BEGIN
+		 SELECT perusahaan_seq.nextval
+		 INTO :new.PID
+		 FROM dual;
+	END;
+	
+	DROP TABLE perusahaan;
+	DROP SEQUENCE perusahaan_seq;
+
+
+				
+			--CREATE TABLE perusahaan_alamat
+			CREATE TABLE perusahaan_alamat (
+				PID NUMBER (11) NOT NULL,
+				Jalan VARCHAR (100) NOT NULL,
+				RT VARCHAR (5),
+				RW VARCHAR (5),
+				Kelurahan VARCHAR (20) NOT NULL,
+				Kecamatan VARCHAR (20) NOT NULL,
+				Kab_Kota VARCHAR (30) NOT NULL,
+				Provinsi VARCHAR (20) NOT NULL,
+				KodePos VARCHAR(6) NOT NULL,
+				CONSTRAINT perusahaan_alamat FOREIGN KEY (PID) REFERENCES perusahaan(PID)
+			);
+		
+ALTER TABLE PENGIRIMAN.PERUSAHAAN_TELP ADD CONSTRAINT FK_PERUSAHAAN_1 FOREIGN KEY (PID) REFERENCES PENGIRIMAN.PERUSAHAAN(PID) ON DELETE CASCADE;
+
+--CREATE TABLE perusahaan_telp
+CREATE TABLE perusahaan_telp(
+	PID NUMBER (11) NOT NULL,
+	PTelp VARCHAR (15) NOT NULL,
+	CONSTRAINT perusahaan_telp FOREIGN KEY (PID) REFERENCES perusahaan(PID)
+)
+
+--CREATE TABLE customer
+CREATE TABLE customer(
+	CID NUMBER (10) NOT NULL PRIMARY KEY,
+	CNama VARCHAR (50),
+	CGender VARCHAR (10),
+	CTelp varchar (15),
+	CNIK varchar (20) UNIQUE,
+	CWaktuPesan TIMESTAMP
+
+)
+
+CREATE SEQUENCE customer_seq START WITH 1;
+
+CREATE OR REPLACE TRIGGER customer_on_insert
+	 BEFORE INSERT ON customer
+	 FOR EACH ROW
+BEGIN
+	 SELECT customer_seq.nextval
+	 INTO :new.CID
+	 FROM dual;
+END;
+
+
+
+
+
+
+			--CREATE TABLE customer_alamat
+			CREATE TABLE customer_alamat (
+				CID NUMBER (11) NOT NULL,
+				Jalan VARCHAR (100) NOT NULL,
+				RT VARCHAR (5),
+				RW VARCHAR (5),
+				Kelurahan VARCHAR (20) NOT NULL,
+				Kecamatan VARCHAR (20) NOT NULL,
+				Kab_Kota VARCHAR (30) NOT NULL,
+				Provinsi VARCHAR (20) NOT NULL,
+				KodePos VARCHAR(6) NOT NULL,
+				CONSTRAINT customer_alamat FOREIGN KEY (CID) REFERENCES customer(CID)
+				
+			);
+
+
+/*	DROP TABLE CUSTOMER ;
+	DROP TABLE CUSTOMER_ALAMAT ;
+	DROP SEQUENCE customer_seq;
+	DROP TABLE PERUSAHAAN;
+	DROP TABLE PERUSAHAAN_TELP;
+	DROP TABLE PERUSAHAAN_ALAMAT ;
+	DROP SEQUENCE perusahaan_seq; --*/
+--UNTUK MENGHAPUS KOLOM
+		ALTER TABLE kurir
+					DROP (KenNoPol);
+-- UNTUK MENGUBAH TIPE DATA
+		ALTER TABLE KURIR 
+			MODIFY (KTelp varchar (20) );
+--untuk menghapus isi data
+		DELETE FROM kurir WHERE  kid=1
+		DELETE FROM KURIR_ALAMAT WHERE kid=1
+		DELETE FROM CUSTOMER  WHERE CID=1
+		DELETE FROM kurir WHERE kid=2
+		
+
+	INSERT INTO kurir_ALAMAT (KID, JALAN, RT, RW, KELURAHAN, KECAMATAN, KAB_KOTA, PROVINSI , KODEPOS) VALUES (2, 'Banteng hijau', '5', '1', 'Kukusan', 'Beji', 'Depok','jabar', '166996');
+	INSERT INTO kurir_ALAMAT (KID, JALAN, RT, RW, KELURAHAN, KECAMATAN, KAB_KOTA, PROVINSI , KODEPOS) VALUES (6, 'Banteng hijau', '5', '1', 'Kukusan', 'Beji', 'jkt','jabar', '166996');
+
+				DROP TABLE kurir;
+
+					--CREATE TABLE kurir
+					CREATE TABLE kurir (
+						KID NUMBER (10) NOT NULL PRIMARY KEY,
+						KNama VARCHAR (50),
+						KGender VARCHAR (10),
+						KStatus char (1),
+						KLokasi VARCHAR (50),
+						kTelp varchar (12),
+						KenNoPol VARCHAR (10),
+						KNIK VARCHAR (20) UNIQUE,
+						PID NUMBER (10) NOT NULL,
+						CONSTRAINT perusahaan_fk FOREIGN KEY (PID) REFERENCES perusahaan(PID)
+					)
+								
+					CREATE SEQUENCE kurir_seq START WITH 1;
+					
+					CREATE OR REPLACE TRIGGER kurir_on_insert
+						 BEFORE INSERT ON kurir
+						 FOR EACH ROW
+					BEGIN
+						 SELECT kurir_seq.nextval
+						 INTO :new.KID
+						 FROM dual;
+					END;
+				
+	--					digunakan untuk mengotomatiskan bila di kurir di hapus maka di kurir_alamat juga terhapus
+ALTER TABLE KURIR_ALAMAT  
+ADD CONSTRAINT FK_kuriralamat
+FOREIGN KEY (KID) REFERENCES kurir(KID) 
+ON DELETE CASCADE ON UPDATE CASCADE;
+
+CREATE TABLE kurir_alamat(
+	KID NUMBER (10) NOT NULL,
+	Jalan VARCHAR (100) NOT NULL,
+	RT VARCHAR (5),
+	RW VARCHAR (5),
+	Kelurahan VARCHAR (20) NOT NULL,
+	Kecamatan VARCHAR (20) NOT NULL,
+	Kab_Kota VARCHAR (30) NOT NULL,
+	Provinsi VARCHAR (20) NOT NULL,
+	KodePos VARCHAR(6) NOT NULL,
+	CONSTRAINT kurir_alamat FOREIGN KEY (KID) REFERENCES kurir(KID)
+)
+	
+--CREATE TABLE order
+CREATE TABLE Order_1(
+	OID NUMBER (10) NOT NULL PRIMARY KEY,
+	OResi NUMBER (15) UNIQUE,
+	OWaktuKirim TIMESTAMP,
+	OWaktuTerima TIMESTAMP,
+	OJarak NUMBER (3),
+	OPHarga NUMBER (10),
+	OHarga NUMBER(10),
+	KID NUMBER (10),
+	CID NUMBER (10),
+	MID NUMBER (10),
+		CONSTRAINT kurir_fk FOREIGN KEY (KID) REFERENCES kurir(KID),
+		CONSTRAINT customer_fk FOREIGN KEY (CID) REFERENCES customer(CID),
+		CONSTRAINT makanan_fk FOREIGN KEY (MID) REFERENCES makanan(MID)
+)
+
+CREATE SEQUENCE order_seq START WITH 1;
+
+CREATE OR REPLACE TRIGGER order_t_on_insert
+		 BEFORE INSERT ON order_1
+		 FOR EACH ROW
+	BEGIN
+		 SELECT order_seq.nextval
+		 INTO :new.OID
+		 FROM dual;
+	END;
+
+--CREATE TABLE makanan
+CREATE TABLE makanan(
+	MID NUMBER (10) NOT NULL PRIMARY KEY,
+	MNama VARCHAR (50),
+	MStock NUMBER (2),
+	MHarga NUMBER (10),
+	RID NUMBER (10),
+	CONSTRAINT restoran_fk FOREIGN KEY (RID) REFERENCES restoran(RID)
+)
+
+CREATE SEQUENCE makanan_seq START WITH 1;
+
+CREATE OR REPLACE TRIGGER makanan_on_insert
+		 BEFORE INSERT ON makanan
+		 FOR EACH ROW
+	BEGIN
+		 SELECT makanan_seq.nextval
+		 INTO :new.MID
+		 FROM dual;
+	END;
+
+DROP TABLE kendaraan
+--CREATE TABLE kendaraan
+CREATE TABLE kendaraan(
+	KenNoPol VARCHAR (10) NOT NULL ,
+	KenMerk VARCHAR (10),
+	KID NUMBER (10),
+	CONSTRAINT kendaraan_fk FOREIGN KEY (KID) REFERENCES kurir(KID)
+)
+
+CREATE SEQUENCE kendaraan_seq START WITH 1;
+
+CREATE OR REPLACE TRIGGER kendaraan_on_insert
+	 BEFORE INSERT ON kendaraan
+	 FOR EACH ROW
+BEGIN
+	 SELECT kendaraan_seq.nextval
+	 INTO :new.KenNoPol
+	 FROM dual;
+END;
+
+--CREATE TABLE restoran
+CREATE TABLE restoran(
+	RID NUMBER (10) NOT NULL PRIMARY KEY,
+	RNama VARCHAR (50),
+--		ngga bisa pake time
+	RJamBuka TIMESTAMP,		
+	RJamTutup TIMESTAMP,
+	PID NUMBER (10),
+	CONSTRAINT perusahaan_fk_R FOREIGN KEY (PID) REFERENCES perusahaan(PID)
+)
+
+CREATE SEQUENCE restoran_seq START WITH 1;
+
+CREATE OR REPLACE TRIGGER restoran_on_insert
+	 BEFORE INSERT ON restoran
+	 FOR EACH ROW
+BEGIN
+	 SELECT restoran_seq.nextval
+	 INTO :new.RID
+	 FROM dual;
+END;
+
+
+CREATE TABLE restoran_alamat (
+	RID NUMBER (10) NOT NULL,
+	Jalan VARCHAR (100) NOT NULL,
+	RT VARCHAR (5),
+	RW VARCHAR (5),
+	Kelurahan VARCHAR (20) NOT NULL,
+	Kecamatan VARCHAR (20) NOT NULL,
+	Kab_Kota VARCHAR (30) NOT NULL,
+	Provinsi VARCHAR (20) NOT NULL,
+	KodePos VARCHAR(6) NOT NULL,
+	CONSTRAINT restoran_alamat FOREIGN KEY (RID) REFERENCES restoran(RID)
+);
+
+CREATE TABLE restoran_telp(
+RID NUMBER (10),
+RTelp varchar(20),
+CONSTRAINT restoran_telp FOREIGN KEY (RID) REFERENCES restoran(RID)
+
+)
+--CREATE TABLE transaksi
+CREATE TABLE transaksi(
+	TID NUMBER (10) NOT NULL PRIMARY KEY,
+	TMetode VARCHAR (50),
+	TTanggal TIMESTAMP,
+	TPembayaran TIMESTAMP,	
+		RID NUMBER (10) , 
+		CID NUMBER (10) ,
+		OID NUMBER (10) ,
+		CONSTRAINT customer_fk_t FOREIGN KEY (CID) REFERENCES customer (CID),
+		CONSTRAINT order_fk_t FOREIGN KEY (OID) REFERENCES order_1 (OID),
+		CONSTRAINT restoran_fk_t FOREIGN KEY (RID) REFERENCES restoran (RID)
+
+)
+
+CREATE SEQUENCE transaksi_seq START WITH 1;
+
+CREATE OR REPLACE TRIGGER transaksi_on_insert
+	 BEFORE INSERT ON transaksi
+	 FOR EACH ROW
+BEGIN
+	 SELECT transaksi_seq.nextval
+	 INTO :new.TID
+	 FROM dual;
+END;
+
+
+
+	INSERT INTO customer (Cnama,Cgender,CTELP ,CNIK,cwaktupesan) VALUES('Agus','laki-laki','082137153432','12345678910',TO_TIMESTAMP('2022/07/14','YYYY-MM-DD HH24:MI:SS,FF'));
+	INSERT INTO CUSTOMER_ALAMAT (CID, JALAN, RT, RW, KELURAHAN, KECAMATAN, KAB_KOTA, PROVINSI , KODEPOS) VALUES (2, 'Janda', '5', '1', 'Kukusan', 'Beji', 'Depok','jabar', '166996');
+ 	INSERT INTO PERUSAHAAN (Pnama) VALUES ('SicepatGerry');
+ 	INSERT INTO PERUSAHAAN_ALAMAT (PID, JALAN, RT, RW, KELURAHAN, KECAMATAN, KAB_KOTA, PROVINSI , KODEPOS) VALUES (21, 'Janda', '5', '1', 'Kukusan', 'Beji', 'Depok','jabar', '166996');
+	INSERT INTO kurir (Knama, KGENDER,KSTATUS,KLOKASI,KTELP,KNIK,PID) VALUES('Anisa','Perempuan','N','rawamangun PNJ','081212455875','1785421478963519',21);
+	INSERT INTO kurir_ALAMAT (KID, JALAN, RT, RW, KELURAHAN, KECAMATAN, KAB_KOTA, PROVINSI , KODEPOS) VALUES (9, 'PNJ bersahabat', '12', '3', 'sawah kecil', 'kartini', 'jkt pusat','DKI ACEH', '10750');
+	INSERT INTO RESTORAN ( RNAMA,RJAMBUKA,RJAMTUTUP,PID) VALUES ('MCD',TO_TIMESTAMP('2022/07/14','YYYY-MM-DD HH24:MI:SS,FF'),TO_TIMESTAMP('2022/07/14','YYYY-MM-DD HH24:MI:SS,FF'),1);
+	INSERT INTO RESTORAN_ALAMAT (RID, JALAN, RT, RW, KELURAHAN, KECAMATAN, KAB_KOTA, PROVINSI , KODEPOS) VALUES (1, 'goyangdiah', '7', '11', 'tobat', 'Pasar Baru', 'JKT pusat ','DKI jakarta', '166991');
+	INSERT INTO MAKANAN (Mnama,MSTOCK,MHARGA,RID) VALUES ('Steak nyamuk',23,'500000',1);
+	INSERT INTO ORDER_1 (ORESI,OWAKTUKIRIM,OWAKTUTERIMA,OJARAK,OPHARGA,OHARGA,KID,CID,MID) VALUES (00000000001,TO_TIMESTAMP('2022/07/14','YYYY-MM-DD HH24:MI:SS,FF'),TO_TIMESTAMP('2022/07/14','YYYY-MM-DD HH24:MI:SS,FF'),10,75000,575000,6,2,1);
+	INSERT INTO KENDARAAN (Kennopol,KENMERK,KID) values('B 2352 AD','KUMAHA',6);
+	INSERT INTO TRANSAKSI (Tmetode,TTANGGAL,TPEMBAYARAN,RID,CID,OID) VALUES ('COD',TO_TIMESTAMP('2022/07/14','YYYY-MM-DD HH24:MI:SS,FF'),TO_TIMESTAMP('2022/07/14','YYYY-MM-DD HH24:MI:SS,FF'),1,2,1);
+
+INSERT ALL
+	INTO PERUSAHAAN_TELP (PID, PTelp) VALUES (21, '0822181818')
+	INTO PERUSAHAAN_TELP (PID, PTelp) VALUES (21, '0882161616')
+SELECT * FROM dual;
+INSERT ALL
+	INTO RESTORAN_TELP  (RID , RTELP ) VALUES (1, '0845181818')
+	INTO RESTORAN_TELP  (RID , RTelp) VALUES (1, '0842161616')
+SELECT * FROM dual;
